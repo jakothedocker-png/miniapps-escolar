@@ -153,8 +153,7 @@ export default async function LogsIAPage() {
                   <tr
                     key={log.id}
                     style={{ borderTop: idx > 0 ? '1px solid rgba(6,135,216,0.06)' : undefined }}
-                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(6,135,216,0.03)'}
-                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = ''}
+                    className="hover:bg-blue-500/5 transition-colors"
                   >
                     <td className="px-5 py-3.5 font-mono text-xs whitespace-nowrap">
                       <span style={{ color: '#1E2D3D' }}>{fecha.toLocaleDateString('es-MX')}</span>

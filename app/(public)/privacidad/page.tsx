@@ -116,8 +116,7 @@ export default function PrivacidadPage() {
                 ].map(([esc, resp], idx) => (
                   <tr key={esc}
                     style={{ borderTop: idx > 0 ? '1px solid rgba(6,135,216,0.06)' : undefined }}
-                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(6,135,216,0.03)'}
-                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = ''}
+                    className="hover:bg-blue-500/5 transition-colors"
                   >
                     <td className="px-4 py-2.5" style={{ color: '#64748B' }}>{esc}</td>
                     <td className="px-4 py-2.5" style={{ color: '#64748B' }}>{resp}</td>

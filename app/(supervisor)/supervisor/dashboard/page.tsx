@@ -208,8 +208,7 @@ export default async function SupervisorDashboardPage() {
                   <tr
                     key={e.id}
                     style={{ borderTop: idx > 0 ? '1px solid rgba(6,135,216,0.06)' : undefined }}
-                    onMouseEnter={el => (el.currentTarget as HTMLElement).style.background = 'rgba(6,135,216,0.03)'}
-                    onMouseLeave={el => (el.currentTarget as HTMLElement).style.background = ''}
+                    className="hover:bg-blue-500/5 transition-colors"
                   >
                     <td className="px-5 py-4">
                       <p className="font-medium" style={{ color: '#1E2D3D' }}>{e.nombre}</p>

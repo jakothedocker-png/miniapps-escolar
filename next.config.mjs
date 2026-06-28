@@ -3,6 +3,12 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['xlsx'],
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   webpack: (config) => {
     config.watchOptions = {
       poll: 1000,

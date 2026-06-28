@@ -1,4 +1,5 @@
 'use client'
+'use client'
 
 import { useState, useTransition, useMemo } from 'react'
 import { Plus, Power, Loader2, Search, X, CreditCard, Check } from 'lucide-react'

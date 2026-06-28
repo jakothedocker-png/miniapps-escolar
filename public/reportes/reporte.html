@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Boleta de Evaluación Oficial</title>
+    <link rel="stylesheet" href="reporte.css">
+</head>
+<body>
+
+    <div class="hoja-oficial">
+        
+        <!-- ENCABEZADO -->
+        <header class="encabezado-superior">
+            <img src="banner.png" alt="Logos Oficiales" class="img-banner" onerror="this.style.display='none'">
+            <div class="titulo-ciclo">"2025. Año de la vida municipal en el Estado de México"</div>
+        </header>
+
+        <!-- DATOS ESCUELA -->
+        <section class="datos-escuela">
+            <div class="fila-datos">
+                <div class="campo-dato dato-nombre-escuela">
+                    <strong>NOMBRE DE LA ESCUELA:</strong> <span id="static-nombre-escuela">...</span>
+                </div>
+                <div class="campo-dato dato-cct">
+                    <strong>C. C. T.</strong> <span id="static-cct">...</span>
+                </div>
+                <div class="campo-dato dato-turno">
+                    <strong>TURNO:</strong> <span id="static-turno">MATUTINO</span>
+                </div>
+            </div>
+            <div class="fila-datos">
+                <div class="campo-dato dato-domicilio">
+                    <strong>DOMICILIO:</strong> <span id="static-domicilio">...</span>
+                </div>
+                <div class="campo-dato dato-cp">
+                    <strong>C.P.</strong> <span>51670</span>
+                </div>
+                <div class="campo-dato dato-localidad">
+                    <strong>LOCALIDAD:</strong> <span id="static-localidad">...</span>
+                </div>
+            </div>
+            <div class="fila-datos">
+                <div class="campo-dato dato-grado">
+                    <strong>GRADO:</strong> <span id="dato-grado">...</span>
+                </div>
+                <div class="campo-dato dato-grupo">
+                    <strong>GRUPO:</strong> <span id="dato-grupo">...</span>
+                </div>
+                <div class="campo-dato grow"></div>
+            </div>
+        </section>
+
+        <!-- TITULO TRIMESTRE -->
+        <div id="titulo-trimestre-tabla" class="titulo-trimestre-tabla">...</div>
+
+        <!-- TABLA PRINCIPAL -->
+        <div class="contenedor-tabla-principal">
+            <table id="tabla-reporte">
+                <thead>
+                    <tr>
+                        <th rowspan="2" class="col-np"><div class="texto-vertical">N.P.</div></th>
+                        <th rowspan="2" class="col-nombre" style="text-align: center !important;">APELLIDOS Y NOMBRE</th>
+                        <th rowspan="2" class="col-genero"><div class="texto-vertical">GÉNERO (H/M)</div></th>
+                        <th rowspan="2" class="col-edad"><div class="texto-vertical">EDAD</div></th>
+                        <th rowspan="2" class="col-inasist"><div class="texto-vertical">INASISTENCIAS</div></th>
+                        <th colspan="4" class="col-campos-header">ASIGNATURA / ÁREAS</th>
+                        <th rowspan="2" class="col-prom"><div class="texto-vertical">PROMEDIO</div></th>
+                    </tr>
+                    <tr>
+                        <th class="col-campo"><div class="texto-vertical">LENGUAJES</div></th>
+                        <th class="col-campo"><div class="texto-vertical">SABERES Y P. C.</div></th>
+                        <th class="col-campo"><div class="texto-vertical">ÉTICA, NAT. Y SOC.</div></th>
+                        <th class="col-campo"><div class="texto-vertical">DE LO HUMANO</div></th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpo-tabla"></tbody>
+            </table>
+        </div>
+
+        <!-- ESTADÍSTICA (AQUÍ VA, ENTRE TABLA Y PIE) -->
+        <div class="contenedor-estadistica">
+            <table class="tabla-estadistica">
+                <thead>
+                    <tr>
+                        <th>RANGO</th><th>10</th><th>9</th><th>8</th><th>7</th><th>6</th><th>5</th><th>TOTAL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="label-stat">ALUMNOS</td><td id="stat-num-10">0</td><td id="stat-num-9">0</td><td id="stat-num-8">0</td><td id="stat-num-7">0</td><td id="stat-num-6">0</td><td id="stat-num-5">0</td><td id="stat-total-alum">0</td>
+                    </tr>
+                    <tr>
+                        <td class="label-stat">%</td><td id="stat-perc-10">0%</td><td id="stat-perc-9">0%</td><td id="stat-perc-8">0%</td><td id="stat-perc-7">0%</td><td id="stat-perc-6">0%</td><td id="stat-perc-5">0%</td><td id="stat-total-perc">100%</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- PIE DE PÁGINA FIJO -->
+        <div id="footer-fijo">
+            
+            <div class="fila-lugar-fecha">
+                <span id="dato-lugar-fecha">...</span>
+            </div>
+
+            <footer class="seccion-firmas">
+                <div class="bloque-firma">
+                    <div class="linea-firma"></div>
+                    <div class="nombre-firma" id="nombre-docente">...</div>
+                    <div class="cargo-firma">MAESTRO (A) DE GRUPO</div>
+                </div>
+
+                <div class="bloque-datos-central">
+                    <div class="dato-central espacio-sello">(SELLO)</div>
+                </div>
+
+                <div class="bloque-firma">
+                    <div class="linea-firma"></div>
+                    <div class="nombre-firma" id="nombre-director">...</div>
+                    <div class="cargo-firma">DIRECTOR (A) DE LA ESCUELA</div>
+                </div>
+            </footer>
+
+            <div class="footer-decoracion">
+                <img src="pie.png" alt="Decoración" class="img-footer" onerror="this.style.display='none'">
+            </div>
+        </div>
+
+    </div>
+    
+    <script type="module" src="reporte.js"></script>
+</body>
+</html>

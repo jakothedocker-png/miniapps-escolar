@@ -1,0 +1,173 @@
+/* UBICACIÓN: reportes/reporte.css */
+
+/* --- VISUALIZACIÓN EN PANTALLA --- */
+body {
+    margin: 0;
+    padding: 20px;
+    background-color: #525659; /* Fondo gris de visor PDF */
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8pt;
+    display: flex;
+    justify-content: center;
+}
+
+.hoja-oficial {
+    background-color: white;
+    width: 21.59cm;  /* Carta Vertical */
+    min-height: 27.94cm; 
+    padding: 1cm 1.5cm; /* Márgenes internos */
+    box-sizing: border-box;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    position: relative;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- ESTILOS DEL CONTENIDO --- */
+
+/* 1. ENCABEZADO */
+.encabezado-superior { text-align: center; margin-bottom: 10px; }
+.img-banner { width: 100%; max-width: 100%; height: auto; max-height: 2cm; display: block; margin: 0 auto; }
+.titulo-ciclo { font-size: 7pt; font-weight: bold; text-align: center; margin-top: 4px; font-style: italic; }
+
+/* 2. DATOS ESCUELA */
+.datos-escuela { border: 1px solid #000; padding: 4px; margin-bottom: 5px; font-size: 7.5pt; }
+.fila-datos { display: flex; margin-bottom: 4px; align-items: baseline; }
+.campo-dato { white-space: nowrap; margin-right: 10px; }
+.campo-dato strong { font-weight: bold; margin-right: 3px; }
+.dato-nombre-escuela { flex: 2; } 
+.dato-cct { width: 120px; } 
+.dato-turno { width: 100px; text-align: right; }
+.dato-domicilio { flex: 2; } 
+.dato-cp { width: 80px; } 
+.dato-localidad { width: 150px; text-align: right; }
+.dato-grado { width: 80px; } 
+.dato-grupo { width: 80px; } 
+.grow { flex-grow: 1; }
+
+/* TÍTULO TRIMESTRE */
+.titulo-trimestre-tabla { 
+    text-align: center; font-weight: bold; font-size: 9pt; margin-bottom: 0; 
+    text-transform: uppercase; border: 1px solid #000; border-bottom: none; 
+    padding: 3px; background-color: #f9f9f9; 
+}
+
+/* 3. TABLA PRINCIPAL */
+.contenedor-tabla-principal { margin-bottom: 15px; }
+
+#tabla-reporte { width: 100%; border-collapse: collapse; font-size: 7pt; }
+#tabla-reporte th, #tabla-reporte td { border: 1px solid #000; padding: 1px; text-align: center; vertical-align: middle; }
+#tabla-reporte th { background-color: #e2efda !important; font-weight: bold; color: #000; -webkit-print-color-adjust: exact; }
+
+/* Texto Vertical en Encabezados */
+.texto-vertical { 
+    writing-mode: vertical-rl; transform: rotate(180deg); 
+    white-space: normal; word-break: keep-all; 
+    height: 100px; width: 100%; 
+    display: flex; align-items: center; justify-content: center; 
+    font-size: 7pt; line-height: 1.1; margin: 0 auto; 
+}
+
+/* ANCHOS DE COLUMNA (TU DISEÑO ORIGINAL) */
+.col-np { width: 20px; } 
+.col-genero { width: 20px; } 
+.col-edad { width: 20px; } 
+.col-inasist { width: 25px; } 
+
+/* Columnas de Calificación (Estrechas) */
+.col-prom { width: 40px; background-color: #e2efda !important; font-weight: bold; } 
+.col-campo { width: 35px; }   
+
+/* Columna de Nombre (ANCHA) */
+.col-nombre { 
+    width: 250px; /* Ancho fijo para nombres largos */
+    text-align: left !important; padding-left: 5px !important; 
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
+    background-color: #fff !important; 
+}
+th.col-nombre { text-align: center !important; background-color: #e2efda !important; }
+
+/* Fila Promedios Finales */
+.fila-promedios td { background-color: #e2efda !important; font-weight: bold; border-top: 2px solid #000 !important; -webkit-print-color-adjust: exact; }
+.label-promedio-final { text-align: right !important; padding-right: 10px !important; }
+.dato-promedio-general { background-color: #d0e0c5 !important; border: 2px solid #000 !important; }
+
+
+/* 4. ESTADÍSTICA (Fluye debajo de la tabla, no en el footer fijo) */
+.contenedor-estadistica { 
+    margin-bottom: 20px; 
+    display: flex; 
+    justify-content: center; /* Alineada a la derecha como en el PDF */
+    page-break-inside: avoid;
+}
+.tabla-estadistica { width: 50%; border-collapse: collapse; font-size: 7pt; }
+.tabla-estadistica th, .tabla-estadistica td { border: 1px solid #000; padding: 2px; text-align: center; }
+.tabla-estadistica th { background-color: #e2efda !important; -webkit-print-color-adjust: exact; }
+.label-stat { font-weight: bold; text-align: center; padding-right: 5px; }
+
+
+/* 5. FOOTER FIJO (Lugar, Fecha, Firmas, Imagen Pie) */
+#footer-fijo {
+    margin-top: auto; /* En pantalla se va al fondo */
+    width: 100%;
+}
+
+.fila-lugar-fecha { 
+    text-align: center; font-weight: bold; font-size: 8pt; 
+    margin-bottom: 30px; margin-right: 10px; 
+}
+
+.seccion-firmas { 
+    display: flex; justify-content: space-around; align-items: flex-end; 
+    padding: 0; font-size: 7.5pt; margin-bottom: 10px;
+}
+.bloque-firma { text-align: center; width: 40%; }
+.linea-firma { border-top: 1px solid #000; margin-bottom: 3px; margin-left: 10px; margin-right: 10px; }
+.nombre-firma { font-weight: bold; margin-bottom: 2px; font-size: 7pt; }
+.cargo-firma { font-size: 6.5pt; }
+
+/* Sello (Opcional, centrado) */
+.bloque-datos-central { text-align: center; width: 20%; }
+.espacio-sello { color: #ccc; font-size: 8pt; }
+
+.footer-decoracion { margin-top: 5px; width: 100%; text-align: center; }
+.img-footer { width: 100%; height: auto; max-height: 1.5cm; display: block; margin: 0 auto; }
+
+
+/* --- MODO IMPRESIÓN --- */
+@media print {
+    @page { 
+        size: letter portrait; 
+        margin: 1cm 1.5cm; /* Márgenes de la impresora */
+    }
+    
+    body { 
+        margin: 0; padding: 0; background: none; display: block; 
+        /* Padding inferior para reservar espacio al footer fijo y que no se encime con la tabla */
+        padding-bottom: 4cm; 
+    }
+
+    .hoja-oficial { 
+        width: 100% !important; 
+        height: auto !important; 
+        min-height: 0 !important;
+        margin: 0 !important; 
+        padding: 0 !important; 
+        box-shadow: none; border: none; 
+        overflow: visible; display: block; 
+    }
+
+    /* El footer se fija al final de cada página física */
+    #footer-fijo {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: white; /* Fondo blanco para tapar si algo se pasa */
+        z-index: 100;
+    }
+
+    tr { page-break-inside: avoid; }
+    .seccion-firmas, .contenedor-estadistica { page-break-inside: avoid; }
+}

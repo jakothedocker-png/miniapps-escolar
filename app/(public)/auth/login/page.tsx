@@ -45,6 +45,7 @@ export default function LoginPage() {
       .eq('id', user.id)
       .single()
 
+    router.refresh()
     router.push(DESTINOS[usuario?.rol ?? ''] ?? '/app/dashboard')
   }
 

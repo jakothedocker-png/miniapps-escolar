@@ -61,7 +61,7 @@ export default function RiesgoClient({ alumnos }: Props) {
   })
 
   return (
-    <div style={{ minHeight: '100vh' }}><div className="p-6 max-w-5xl mx-auto">
+    <div className="p-6" style={{ background: '#F5F8FF', minHeight: '100%' }}>
       <div className="mb-6">
         <h1 className="text-2xl font-bold flex items-center gap-2" style={{ color: '#1E2D3D' }}>
           <AlertTriangle size={22} style={{ color: '#DC2626' }} />
@@ -159,6 +159,6 @@ export default function RiesgoClient({ alumnos }: Props) {
           </div>
         </div>
       )}
-    </div></div>
+    </div>
   )
 }

@@ -124,7 +124,7 @@ export default function ConfiguracionClient({ escuela, maestro }: Props) {
   }
 
   return (
-    <div style={{ minHeight: '100vh' }}><div className="p-8 max-w-3xl mx-auto space-y-8">
+    <div className="p-8 space-y-8" style={{ background: '#F5F8FF', minHeight: '100%' }}>
 
       <div>
         <h1 className="text-2xl font-bold" style={{ color: '#1E2D3D' }}>Configuración</h1>
@@ -312,6 +312,6 @@ function Dato({
           {value}
         </p>
       )}
-    </div></div>
+    </div>
   )
 }

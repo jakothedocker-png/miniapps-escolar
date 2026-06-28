@@ -67,7 +67,7 @@ export default function ReportesClient({ grupos, alumnosPorGrupo }: Props) {
 
   if (grupos.length === 0) {
     return (
-      <div style={{ minHeight: '100vh' }}><div className="p-8 max-w-2xl mx-auto">
+      <div className="p-8" style={{ background: '#F5F8FF', minHeight: '100%' }}>
         <h1 className="text-2xl font-bold mb-2" style={{ color: '#1E2D3D' }}>Reportes</h1>
         <p style={{ color: '#64748B' }}>No tienes grupos asignados. Solicita al director que te asigne un grupo.</p>
       </div>
@@ -75,7 +75,7 @@ export default function ReportesClient({ grupos, alumnosPorGrupo }: Props) {
   }
 
   return (
-    <div style={{ minHeight: '100vh' }}><div className="p-6 max-w-4xl mx-auto">
+    <div className="p-8" style={{ background: '#F5F8FF', minHeight: '100%' }}>
       <div className="mb-8">
         <h1 className="text-2xl font-bold mb-1" style={{ color: '#1E2D3D' }}>Reportes</h1>
         <p className="text-sm" style={{ color: '#64748B' }}>Genera e imprime los reportes oficiales de calificaciones.</p>
@@ -255,6 +255,6 @@ export default function ReportesClient({ grupos, alumnosPorGrupo }: Props) {
       <p className="mt-6 text-xs text-center" style={{ color: '#94A3B8' }}>
         Los reportes se abren en una nueva pestaña. Usa Ctrl+P (o Cmd+P) para imprimir o guardar como PDF.
       </p>
-    </div></div>
+    </div>
   )
 }

@@ -30,7 +30,7 @@ export default async function MaestroLayout({ children }: { children: React.Reac
       <div className="fixed bottom-0 left-0 w-[55%] h-[55%] rounded-full bg-indigo-900/50 blur-[120px] -translate-x-1/4 translate-y-1/4 pointer-events-none -z-10" />
 
       <MaestroSidebar nombre={usuario.nombre} />
-      <main className="flex-1 overflow-auto h-screen" style={{ background: '#F5F8FF' }}>
+      <main className="flex-1 overflow-auto h-screen">
         {modoConsulta && <BannerConsulta />}
         {children}
       </main>

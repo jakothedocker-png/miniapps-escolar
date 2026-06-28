@@ -113,7 +113,7 @@ export default function ConfiguracionClient({ escuela, maestro }: Props) {
 
   if (!escuela) {
     return (
-      <div className="p-8" style={{ background: '#F5F8FF', minHeight: '100%' }}>
+      <div className="p-8" style={{ background: '#F5F8FF', minHeight: '100vh' }}>
         <div className="rounded-2xl p-6 text-center" style={{ background: '#FFFBEB', border: '1px solid rgba(180,83,9,0.20)' }}>
           <School size={32} className="mx-auto mb-3" style={{ color: '#B45309' }} />
           <p className="font-medium" style={{ color: '#92400E' }}>No se encontró tu escuela.</p>
@@ -124,7 +124,7 @@ export default function ConfiguracionClient({ escuela, maestro }: Props) {
   }
 
   return (
-    <div className="p-8 max-w-3xl space-y-8" style={{ background: '#F5F8FF', minHeight: '100%' }}>
+    <div className="p-8 max-w-3xl space-y-8" style={{ background: '#F5F8FF', minHeight: '100vh' }}>
 
       <div>
         <h1 className="text-2xl font-bold" style={{ color: '#1E2D3D' }}>Configuración</h1>

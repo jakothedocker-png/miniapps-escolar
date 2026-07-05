@@ -10,6 +10,16 @@
 ## Sesiones
 
 ### Sesión — 2026-07-04 (tarde)
+**Respaldos ZIP (kardex masivo por grupo)**
+- Nueva ruta `GET /api/reportes/respaldo-zip?grupoId=` — genera el kardex HTML de cada alumno activo del grupo y los empaqueta con JSZip en servidor (1 query de evaluaciones para todo el grupo)
+- Refactor: la generación del kardex se extrajo a `lib/reportes/kardex-html.ts` (`generarKardexHTML` con opción `autoPrint`); la ruta `/api/reportes/kardex` ahora la reutiliza — los kardex del ZIP NO imprimen al abrirse
+- Nomenclatura: ZIP `Respaldo_Kardex_{grado}_{grupo}_{ciclo}.zip`; archivos internos `NN_KARDEX_{APELLIDOS_NOMBRE}.html`
+- Permisos idénticos al kardex (maestro dueño / director su escuela / supervisor su zona + licencia vigente)
+- UI: 4ª tarjeta "Respaldo ZIP" (morada, FolderArchive) en `/app/reportes` con spinner "Generando…" y mensaje de error inline; grid ahora md:2 / lg:4 columnas
+- Fix de paso: `'use client'` duplicado en ReportesClient.tsx
+- Dependencia nueva: `jszip@3.10.1`
+- Nota: solo está en reportes del maestro; la versión director/supervisor (por escuela) queda para el bloque Home Director
+
 **Módulo Aprovechamiento completo (paridad SIDEC, adaptado a maestro)**
 - Nueva ruta `/app/aprovechamiento`: `page.tsx` (server: grupos del maestro + alumnos activos + evaluaciones de todos los períodos) + `AprovechamientoClient.tsx`
 - 5 tabs: Por Período, Promedio Final, Aprendizajes Esperados, Gráficas (Recharts), Evolución (Diag→T3)
@@ -117,12 +127,13 @@
 - [x] Calificaciones (captura multi-campo, guardar)
 - [x] Reportes Excel multi-período (formato SIDEC)
 - [x] Kardex individual HTML imprimible
+- [x] Aprovechamiento (5 tabs + gráficas + Excel)
+- [x] Respaldos ZIP (kardex masivo por grupo)
 - [x] Sistema de diseño Deepin Light en toda la app
 
 ## Módulos pendientes (por orden de prioridad)
 - [ ] IA en calificaciones — verificar y activar botón Generar
 - [ ] Alumnos en Riesgo — verificar query y visualización
-- [ ] Respaldos ZIP — desde cero
 - [ ] Movimientos de alumnos — frontend desde cero (DB lista)
 - [ ] Auditoría de calificaciones — frontend desde cero (DB lista)
 - [ ] Home Director — contenido y estadísticas

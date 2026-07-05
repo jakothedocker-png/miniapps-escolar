@@ -17,8 +17,7 @@
 
 ## Prioridad baja (mejoras)
 
-- [ ] **Respaldos ZIP** — descarga masiva de kardex de todo un grupo o escuela en ZIP
-- [ ] **Boleta de grupo completo** — generar todos los kardex de un grupo en una sola acción (hoy es alumno por alumno)
+- [ ] **Respaldo ZIP por escuela** — versión para director/supervisor (todos los grupos de la escuela); la versión por grupo del maestro ya existe. Hacerlo junto con Home Director.
 - [ ] **Sistema de pagos** — integración Stripe o equivalente para activar licencias automáticamente (hoy es manual vía superadmin)
 - [ ] **Período activo por escuela/zona** — campo `periodo_activo` en escuelas o zonas para que director/supervisor pueda abrir/cerrar capturas. Decisión tomada: NO implementar hasta que lleguen directores.
 
@@ -32,6 +31,7 @@
 
 ## Completados
 
+- [x] Respaldos ZIP por grupo — /api/reportes/respaldo-zip + tarjeta en /app/reportes; cubre también "boleta de grupo completo" (2026-07-04)
 - [x] Aprovechamiento con gráficas — 5 tabs + Excel 6 hojas, ruta /app/aprovechamiento (2026-07-04)
 - [x] Auditoría de calificaciones — inserción automática desde Server Actions (decisión: Server Action, no trigger SQL) (2026-07-04)
 - [x] Reiniciar observación IA — Server Action + panel en Dev Console /dev/usuarios (2026-07-04)

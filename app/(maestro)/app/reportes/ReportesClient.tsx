@@ -1,8 +1,7 @@
 'use client'
-'use client'
 
 import { useState } from 'react'
-import { FileText, FileSpreadsheet, User, ChevronDown, Printer, BookOpen } from 'lucide-react'
+import { FileText, FileSpreadsheet, User, ChevronDown, Printer, BookOpen, FolderArchive, Loader2 } from 'lucide-react'
 
 interface Grupo {
   id: string
@@ -41,6 +40,8 @@ export default function ReportesClient({ grupos, alumnosPorGrupo }: Props) {
   const [trimestre, setTrimestre] = useState(1)
   const [alumnoId, setAlumnoId] = useState('')
   const [showAlumnos, setShowAlumnos] = useState(false)
+  const [zipGenerando, setZipGenerando] = useState(false)
+  const [zipError, setZipError] = useState('')
 
   const grupo = grupos.find(g => g.id === grupoId)
   const alumnos = grupoId ? (alumnosPorGrupo[grupoId] ?? []) : []
@@ -58,6 +59,32 @@ export default function ReportesClient({ grupos, alumnosPorGrupo }: Props) {
   function descargarExcel() {
     if (!grupoId) return
     window.location.href = `/api/reportes/excel?grupoId=${grupoId}&trimestre=${trimestre}`
+  }
+
+  async function descargarRespaldoZip() {
+    if (!grupoId || zipGenerando) return
+    setZipGenerando(true)
+    setZipError('')
+    try {
+      const res = await fetch(`/api/reportes/respaldo-zip?grupoId=${grupoId}`)
+      if (!res.ok) {
+        setZipError(await res.text() || 'Error al generar el respaldo')
+        return
+      }
+      const blob = await res.blob()
+      const disposition = res.headers.get('Content-Disposition') ?? ''
+      const match = disposition.match(/filename="(.+)"/)
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = match?.[1] ?? 'respaldo_kardex.zip'
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch {
+      setZipError('Error de conexión al generar el respaldo')
+    } finally {
+      setZipGenerando(false)
+    }
   }
 
   const alumnoSeleccionado = alumnos.find(a => a.id === alumnoId)
@@ -131,7 +158,7 @@ export default function ReportesClient({ grupos, alumnosPorGrupo }: Props) {
       </div>
 
       {/* Cards de reportes */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
 
         {/* Cuadro General */}
         <div className="rounded-2xl p-5 flex flex-col" style={cardStyle}>
@@ -246,6 +273,37 @@ export default function ReportesClient({ grupos, alumnosPorGrupo }: Props) {
           >
             <FileSpreadsheet size={15} />
             Descargar .xlsx
+          </button>
+        </div>
+
+        {/* Respaldo ZIP */}
+        <div className="rounded-2xl p-5 flex flex-col" style={cardStyle}>
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4"
+            style={{ background: 'rgba(124,58,237,0.10)' }}>
+            <FolderArchive size={20} style={{ color: '#7C3AED' }} />
+          </div>
+          <h3 className="font-semibold mb-1" style={{ color: '#1E2D3D' }}>Respaldo ZIP</h3>
+          <p className="text-xs mb-4 flex-1" style={{ color: '#64748B' }}>
+            Descarga el kardex de todos los alumnos del grupo en un solo archivo ZIP.
+          </p>
+          {grupo && (
+            <p className="text-xs font-medium mb-3" style={{ color: '#7C3AED' }}>
+              {grupo.grado} &quot;{grupo.grupo}&quot; — {alumnos.length} alumno{alumnos.length === 1 ? '' : 's'}
+            </p>
+          )}
+          {zipError && (
+            <p className="text-xs mb-3 px-3 py-2 rounded-lg" style={{ background: '#FEE2E2', color: '#B91C1C' }}>
+              {zipError}
+            </p>
+          )}
+          <button
+            onClick={descargarRespaldoZip}
+            disabled={!grupoId || zipGenerando}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-white text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ background: 'linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%)', boxShadow: '0 4px 16px rgba(124,58,237,0.25)' }}
+          >
+            {zipGenerando ? <Loader2 size={15} className="animate-spin" /> : <FolderArchive size={15} />}
+            {zipGenerando ? 'Generando…' : 'Descargar .zip'}
           </button>
         </div>
 

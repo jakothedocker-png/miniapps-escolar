@@ -22,8 +22,14 @@ export async function crearUsuario(data: {
   password: string
   zona_id: string
   rol: string
+  escuela_id?: string
 }) {
   if (!(await esSuperadmin())) return { error: 'Sin permisos' }
+
+  // El director filtra todas sus vistas por usuario.escuela_id: sin escuela vería todo vacío
+  if (data.rol === 'director' && !data.escuela_id)
+    return { error: 'Un director necesita escuela asignada' }
+
   const supabase = createAdminClient()
 
   // Crear en Supabase Auth
@@ -41,6 +47,7 @@ export async function crearUsuario(data: {
     nombre: data.nombre,
     email: data.email,
     zona_id: data.zona_id || null,
+    escuela_id: data.escuela_id || null,
     rol: data.rol,
     estatus: 'activo',
   })

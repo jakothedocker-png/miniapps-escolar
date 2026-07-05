@@ -10,6 +10,11 @@
 ## Sesiones
 
 ### Sesión — 2026-07-04 (tarde)
+**Selector de escuela al crear usuario (Dev Console)**
+- El formulario de `/dev/usuarios` no capturaba `escuela_id`: un director creado ahí quedaba sin escuela y veía todo vacío (sus vistas filtran por `usuario.escuela_id`)
+- `crearUsuario` ahora acepta `escuela_id` y rechaza directores sin escuela; el modal muestra selector de escuela (requerido para director, opcional para maestro, oculto para supervisor) filtrado por la zona elegida
+- Para probar roles: crear usuarios de prueba director/supervisor desde Dev Console y entrar en incógnito
+
 **Respaldos ZIP (kardex masivo por grupo)**
 - Nueva ruta `GET /api/reportes/respaldo-zip?grupoId=` — genera el kardex HTML de cada alumno activo del grupo y los empaqueta con JSZip en servidor (1 query de evaluaciones para todo el grupo)
 - Refactor: la generación del kardex se extrajo a `lib/reportes/kardex-html.ts` (`generarKardexHTML` con opción `autoPrint`); la ruta `/api/reportes/kardex` ahora la reutiliza — los kardex del ZIP NO imprimen al abrirse

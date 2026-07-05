@@ -66,7 +66,14 @@ function precioEstimado(periodos: string[], tier: typeof TIERS[0] | null): strin
 }
 
 const CICLO_ACTUAL = '2025-2026'
-const FORM_VACIO = { nombre: '', email: '', password: '', zona_id: '', rol: 'maestro' }
+const FORM_VACIO = { nombre: '', email: '', password: '', zona_id: '', rol: 'maestro', escuela_id: '' }
+
+interface EscuelaOpcion {
+  id: string
+  nombre: string
+  cct: string | null
+  zona_id: string | null
+}
 
 const cardStyle = {
   background: '#FFFFFF',
@@ -78,7 +85,7 @@ const inputStyle = { border: '1px solid #E2E8F0', background: '#fff', color: '#1
 
 // ─── Componente ──────────────────────────────────────────────────────────────
 
-export default function UsuariosClient({ usuarios, zonas }: { usuarios: Usuario[], zonas: Zona[] }) {
+export default function UsuariosClient({ usuarios, zonas, escuelas }: { usuarios: Usuario[], zonas: Zona[], escuelas: EscuelaOpcion[] }) {
   const [modal,     setModal]     = useState(false)
   const [modalPlan, setModalPlan] = useState<Usuario | null>(null)
   const [form,      setForm]      = useState(FORM_VACIO)
@@ -614,7 +621,7 @@ export default function UsuariosClient({ usuarios, zonas }: { usuarios: Usuario[
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
                 <label className="text-xs font-medium" style={{ color: '#64748B' }}>Zona</label>
-                <select value={form.zona_id} onChange={e => setForm(f => ({ ...f, zona_id: e.target.value }))}
+                <select value={form.zona_id} onChange={e => setForm(f => ({ ...f, zona_id: e.target.value, escuela_id: '' }))}
                   className="w-full px-3 py-2 rounded-xl text-sm focus:outline-none transition"
                   style={inputStyle}
                   onFocus={e => (e.currentTarget as HTMLElement).style.borderColor = '#0687D8'}
@@ -625,7 +632,7 @@ export default function UsuariosClient({ usuarios, zonas }: { usuarios: Usuario[
               </div>
               <div className="space-y-1">
                 <label className="text-xs font-medium" style={{ color: '#64748B' }}>Rol *</label>
-                <select value={form.rol} onChange={e => setForm(f => ({ ...f, rol: e.target.value }))}
+                <select value={form.rol} onChange={e => setForm(f => ({ ...f, rol: e.target.value, escuela_id: e.target.value === 'supervisor' ? '' : f.escuela_id }))}
                   className="w-full px-3 py-2 rounded-xl text-sm focus:outline-none transition"
                   style={inputStyle}
                   onFocus={e => (e.currentTarget as HTMLElement).style.borderColor = '#0687D8'}
@@ -634,6 +641,34 @@ export default function UsuariosClient({ usuarios, zonas }: { usuarios: Usuario[
                 </select>
               </div>
             </div>
+            {form.rol !== 'supervisor' && (
+              <div className="space-y-1">
+                <label className="text-xs font-medium" style={{ color: '#64748B' }}>
+                  Escuela{form.rol === 'director' ? ' *' : ''}
+                  {form.rol === 'maestro' && <span style={{ color: '#94A3B8' }}> (opcional)</span>}
+                </label>
+                <select value={form.escuela_id} onChange={e => setForm(f => ({ ...f, escuela_id: e.target.value }))}
+                  required={form.rol === 'director'}
+                  className="w-full px-3 py-2 rounded-xl text-sm focus:outline-none transition"
+                  style={inputStyle}
+                  onFocus={e => (e.currentTarget as HTMLElement).style.borderColor = '#0687D8'}
+                  onBlur={e => (e.currentTarget as HTMLElement).style.borderColor = '#E2E8F0'}>
+                  <option value="">Sin escuela</option>
+                  {escuelas
+                    .filter(esc => !form.zona_id || esc.zona_id === form.zona_id)
+                    .map(esc => (
+                      <option key={esc.id} value={esc.id}>
+                        {esc.nombre}{esc.cct ? ` — ${esc.cct}` : ''}
+                      </option>
+                    ))}
+                </select>
+                {form.rol === 'director' && (
+                  <p className="text-xs" style={{ color: '#94A3B8' }}>
+                    El director solo ve los datos de su escuela asignada.
+                  </p>
+                )}
+              </div>
+            )}
             {error && <p className="text-sm px-3 py-2 rounded-xl" style={{ color: '#DC2626', background: '#FEF2F2' }}>{error}</p>}
             <div className="flex gap-3 pt-2">
               <button type="button" onClick={() => setModal(false)}

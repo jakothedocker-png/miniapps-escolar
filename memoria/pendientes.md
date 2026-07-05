@@ -11,7 +11,7 @@
 ## Prioridad media (cuando lleguen directores)
 
 - [ ] **Home Director** — resumen de su escuela: total alumnos, grupos activos, captura por grado, alertas de riesgo
-- [ ] **Movimientos de alumnos** — frontend completo: tabla con filtros, formulario de alta/baja/traslado. La tabla DB `movimientos` ya existe con RLS.
+- [ ] **Vista de movimientos para director/supervisor** — la página del maestro ya existe; falta exponer el historial en los dashboards de director (su escuela) y supervisor (su zona). Hacerlo junto con Home Director.
 - [ ] **Auditoría de calificaciones** — frontend: tabla con filtros por período, campo y maestro. La tabla DB `auditoria_calificaciones` ya existe con RLS y **ya recibe registros** desde los Server Actions (hecho 2026-07-04).
 - [ ] **Dashboard Supervisor** — estadísticas de zona: matrícula total, escuelas activas, promedio general por escuela, alertas de captura pendiente
 
@@ -31,6 +31,7 @@
 
 ## Completados
 
+- [x] Movimientos de alumnos — registro automático (alta/baja con motivo) + historial /app/movimientos + fix seguridad darDeBajaAlumno (2026-07-04)
 - [x] Respaldos ZIP por grupo — /api/reportes/respaldo-zip + tarjeta en /app/reportes; cubre también "boleta de grupo completo" (2026-07-04)
 - [x] Aprovechamiento con gráficas — 5 tabs + Excel 6 hojas, ruta /app/aprovechamiento (2026-07-04)
 - [x] Auditoría de calificaciones — inserción automática desde Server Actions (decisión: Server Action, no trigger SQL) (2026-07-04)

@@ -63,6 +63,7 @@ export default function AlumnosClient({ grupo, alumnos }: Props) {
   const [form, setForm] = useState(FORM_VACIO)
   const [error, setError] = useState<string | null>(null)
   const [confirmBaja, setConfirmBaja] = useState<Alumno | null>(null)
+  const [motivoBaja, setMotivoBaja] = useState('')
   const [alumnoEdit, setAlumnoEdit] = useState<Alumno | null>(null)
   const [formEdit, setFormEdit] = useState(FORM_VACIO)
   const [errorEdit, setErrorEdit] = useState<string | null>(null)
@@ -133,12 +134,12 @@ export default function AlumnosClient({ grupo, alumnos }: Props) {
     })
   }
 
-  function handleBaja(alumno: Alumno) { setConfirmBaja(alumno) }
+  function handleBaja(alumno: Alumno) { setMotivoBaja(''); setConfirmBaja(alumno) }
 
   function confirmarBaja() {
     if (!confirmBaja) return
     startTransition(async () => {
-      await darDeBajaAlumno(confirmBaja.id)
+      await darDeBajaAlumno(confirmBaja.id, motivoBaja)
       setConfirmBaja(null)
     })
   }
@@ -500,6 +501,16 @@ export default function AlumnosClient({ grupo, alumnos }: Props) {
               <span className="font-semibold" style={{ color: '#1E2D3D' }}>{nombreCompleto(confirmBaja)}</span>?
               Esta acción se puede deshacer contactando al administrador.
             </p>
+            <div className="space-y-1">
+              <label className="text-xs font-medium" style={{ color: '#64748B' }}>Motivo de la baja</label>
+              <textarea value={motivoBaja} onChange={e => setMotivoBaja(e.target.value)}
+                rows={2} placeholder="Ej. Cambio de domicilio, traslado a otra escuela…"
+                className="w-full px-3 py-2 rounded-xl text-sm focus:outline-none transition resize-none"
+                style={{ border: '1px solid #E2E8F0', background: '#fff', color: '#1E2D3D' }}
+                onFocus={e => (e.currentTarget as HTMLElement).style.borderColor = '#0687D8'}
+                onBlur={e => (e.currentTarget as HTMLElement).style.borderColor = '#E2E8F0'}
+              />
+            </div>
             <div className="flex gap-3">
               <button onClick={() => setConfirmBaja(null)}
                 className="flex-1 py-2.5 rounded-xl text-sm transition-colors"

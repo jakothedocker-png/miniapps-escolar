@@ -10,6 +10,15 @@
 ## Sesiones
 
 ### Sesión — 2026-07-04 (tarde)
+**Movimientos de alumnos (registro automático + historial)**
+- Patrón SIDEC adaptado: el movimiento se registra automáticamente desde los Server Actions de alumnos (no hay formulario dedicado ni trigger SQL); su fallo nunca bloquea la operación (solo console.error)
+- `app/actions/alumnos.ts`: helper `registrarMovimientos` — alta al `crearAlumno` (motivo "Inscripción") e `importarAlumnos` (motivo "Importación desde Excel"); baja en `darDeBajaAlumno` con motivo capturado en el modal (textarea nueva en AlumnosClient)
+- Tipo `traslado` existe en la tabla pero sin flujo UI todavía (no hay cambio de escuela en miniapps v1)
+- Fix seguridad: `darDeBajaAlumno` no verificaba dueño — cualquier usuario autenticado podía dar de baja cualquier alumno vía POST; ahora valida `grupos.maestro_id === user.id`
+- Nueva página `/app/movimientos`: cards de totales por tipo, búsqueda por nombre/CURP, filtro por tipo, tabla (fecha, alumno+CURP, badge tipo, motivo, registró), últimos 500
+- Entrada "Movimientos" (ArrowRightLeft) en sidebar del maestro
+- Build sin errores (36 rutas)
+
 **Selector de escuela al crear usuario (Dev Console)**
 - El formulario de `/dev/usuarios` no capturaba `escuela_id`: un director creado ahí quedaba sin escuela y veía todo vacío (sus vistas filtran por `usuario.escuela_id`)
 - `crearUsuario` ahora acepta `escuela_id` y rechaza directores sin escuela; el modal muestra selector de escuela (requerido para director, opcional para maestro, oculto para supervisor) filtrado por la zona elegida
@@ -134,12 +143,12 @@
 - [x] Kardex individual HTML imprimible
 - [x] Aprovechamiento (5 tabs + gráficas + Excel)
 - [x] Respaldos ZIP (kardex masivo por grupo)
+- [x] Movimientos de alumnos (registro automático + historial)
 - [x] Sistema de diseño Deepin Light en toda la app
 
 ## Módulos pendientes (por orden de prioridad)
 - [ ] IA en calificaciones — verificar y activar botón Generar
 - [ ] Alumnos en Riesgo — verificar query y visualización
-- [ ] Movimientos de alumnos — frontend desde cero (DB lista)
 - [ ] Auditoría de calificaciones — frontend desde cero (DB lista)
 - [ ] Home Director — contenido y estadísticas
 - [ ] Dashboard Supervisor — datos reales de zona

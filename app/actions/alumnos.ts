@@ -11,6 +11,44 @@ interface DatosAlumno {
   grupo_id: string
 }
 
+// Igual que la auditoría de calificaciones: el movimiento se registra desde el
+// Server Action (no trigger SQL) y su fallo nunca bloquea la operación principal
+async function registrarMovimientos(
+  admin: ReturnType<typeof createAdminClient>,
+  tipo: 'alta' | 'baja' | 'traslado',
+  alumnosMov: Array<{ nombre: string; curp: string | null }>,
+  motivo: string,
+  ctx: { registradoPor: string; escuelaId: string; zonaId: string },
+) {
+  try {
+    const [{ data: escuela }, { data: editor }] = await Promise.all([
+      admin.from('escuelas').select('cct').eq('id', ctx.escuelaId).single(),
+      admin.from('usuarios').select('nombre').eq('id', ctx.registradoPor).single(),
+    ])
+
+    const rows = alumnosMov.map(a => ({
+      tipo,
+      alumno_nombre: a.nombre,
+      curp: a.curp,
+      motivo,
+      autorizo_nombre: editor?.nombre ?? null,
+      registrado_por: ctx.registradoPor,
+      cct: escuela?.cct ?? '',
+      escuela_id: ctx.escuelaId,
+      zona_id: ctx.zonaId,
+    }))
+
+    const { error } = await admin.from('movimientos').insert(rows)
+    if (error) console.error('Error al registrar movimiento:', error.message)
+  } catch (e) {
+    console.error('Error al registrar movimiento:', e)
+  }
+}
+
+function nombreCompleto(a: { nombre: string; apellido_paterno: string; apellido_materno?: string | null }): string {
+  return `${a.apellido_paterno} ${a.apellido_materno ?? ''} ${a.nombre}`.replace(/\s+/g, ' ').trim().toUpperCase()
+}
+
 async function verificarLimiteAlumnos(
   admin: ReturnType<typeof createAdminClient>,
   maestroId: string,
@@ -81,6 +119,11 @@ export async function crearAlumno(data: DatosAlumno) {
   }).select('id').single()
 
   if (error) return { error: error.message }
+
+  await registrarMovimientos(admin, 'alta',
+    [{ nombre: nombreCompleto(data), curp: data.curp || null }],
+    'Inscripción',
+    { registradoPor: user.id, escuelaId: grupo.escuela_id, zonaId: grupo.zona_id })
 
   revalidatePath(`/app/grupos/${data.grupo_id}/alumnos`)
   return { ok: true, alumno_id: insertado?.id as string }
@@ -161,25 +204,32 @@ export async function importarAlumnos(
   const { error } = await admin.from('alumnos').insert(rows)
   if (error) return { error: error.message }
 
+  await registrarMovimientos(admin, 'alta',
+    alumnos.map(a => ({ nombre: nombreCompleto(a), curp: a.curp || null })),
+    'Importación desde Excel',
+    { registradoPor: user.id, escuelaId: grupo.escuela_id, zonaId: grupo.zona_id })
+
   revalidatePath(`/app/grupos/${grupo_id}/alumnos`)
   return { insertados: rows.length }
 }
 
-export async function darDeBajaAlumno(alumno_id: string) {
+export async function darDeBajaAlumno(alumno_id: string, motivo?: string) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'No autenticado' }
 
   const admin = createAdminClient()
 
-  // Verificar que el alumno existe
   const { data: alumno } = await admin
     .from('alumnos')
-    .select('grupo_id')
+    .select('grupo_id, nombre, apellido_paterno, apellido_materno, curp, escuela_id, zona_id, grupos(maestro_id)')
     .eq('id', alumno_id)
     .single()
 
   if (!alumno) return { error: 'Alumno no encontrado' }
+
+  const grupo = alumno.grupos as unknown as { maestro_id: string } | null
+  if (grupo?.maestro_id !== user.id) return { error: 'Sin permisos sobre este alumno' }
 
   const { error } = await admin
     .from('alumnos')
@@ -187,6 +237,11 @@ export async function darDeBajaAlumno(alumno_id: string) {
     .eq('id', alumno_id)
 
   if (error) return { error: error.message }
+
+  await registrarMovimientos(admin, 'baja',
+    [{ nombre: nombreCompleto(alumno), curp: alumno.curp ?? null }],
+    motivo?.trim() || 'Sin motivo especificado',
+    { registradoPor: user.id, escuelaId: alumno.escuela_id, zonaId: alumno.zona_id })
 
   revalidatePath(`/app/grupos/${alumno.grupo_id}/alumnos`)
   return { ok: true }

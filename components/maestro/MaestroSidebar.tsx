@@ -3,13 +3,14 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { logout } from '@/app/actions/auth'
-import { LayoutDashboard, Users, LogOut, GraduationCap, Printer, AlertTriangle, Settings, BarChart3 } from 'lucide-react'
+import { LayoutDashboard, Users, LogOut, GraduationCap, Printer, AlertTriangle, Settings, BarChart3, ArrowRightLeft } from 'lucide-react'
 
 const NAV = [
   { href: '/app/dashboard',        label: 'Dashboard',       icon: LayoutDashboard },
   { href: '/app/grupos',           label: 'Mis grupos',      icon: Users },
   { href: '/app/reportes',         label: 'Reportes',        icon: Printer },
   { href: '/app/aprovechamiento',  label: 'Aprovechamiento', icon: BarChart3 },
+  { href: '/app/movimientos',      label: 'Movimientos',     icon: ArrowRightLeft },
   { href: '/app/riesgo',           label: 'En Riesgo',       icon: AlertTriangle },
   { href: '/app/configuracion',    label: 'Configuración',   icon: Settings },
 ]

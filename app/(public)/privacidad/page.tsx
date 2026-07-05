@@ -81,12 +81,12 @@ export default function PrivacidadPage() {
         <Section titulo="5. Uso de Inteligencia Artificial (IA)">
           <p>
             Esta plataforma incorpora un módulo opcional de generación de observaciones con IA,
-            utilizando el modelo <strong>Claude Sonnet de Anthropic</strong>. Al activar esta función:
+            utilizando el modelo <strong>DeepSeek (DeepSeek AI)</strong>. Al activar esta función:
           </p>
           <ul className="list-disc list-inside space-y-1" style={{ color: '#64748B' }}>
-            <li>El sistema envía a Anthropic únicamente el campo formativo, la calificación y la descripción opcional del docente</li>
+            <li>El sistema envía al proveedor de IA únicamente el grado escolar, el campo formativo, la calificación y la descripción opcional del docente</li>
             <li><strong style={{ color: '#1E2D3D' }}>No se envían datos de identificación del alumno</strong> (nombre, CURP u otros)</li>
-            <li>Anthropic no almacena estos datos ni los usa para entrenamiento sin consentimiento</li>
+            <li>El tratamiento de los datos enviados se rige por la política de privacidad vigente del proveedor de IA</li>
             <li>El uso de este módulo es <strong style={{ color: '#1E2D3D' }}>voluntario</strong></li>
           </ul>
           <Alerta>

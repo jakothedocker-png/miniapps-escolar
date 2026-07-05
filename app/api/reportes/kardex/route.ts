@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
   const admin = createAdminClient()
 
   const [{ data: usuario }, { data: grupo }] = await Promise.all([
-    admin.from('usuarios').select('rol, escuela_id, licencia_plan, licencia_periodos').eq('id', user.id).single(),
+    admin.from('usuarios').select('rol, escuela_id, zona_id, licencia_plan, licencia_periodos').eq('id', user.id).single(),
     admin.from('grupos').select('*').eq('id', grupoId).single(),
   ])
 
@@ -63,6 +63,8 @@ export async function GET(request: NextRequest) {
   if (usuario.rol === 'maestro' && grupo.maestro_id !== user.id)
     return new NextResponse('Sin permisos', { status: 403 })
   if (usuario.rol === 'director' && grupo.escuela_id !== usuario.escuela_id)
+    return new NextResponse('Sin permisos', { status: 403 })
+  if (usuario.rol === 'supervisor' && grupo.zona_id !== usuario.zona_id)
     return new NextResponse('Sin permisos', { status: 403 })
 
   const PERIODOS_PAGO = ['trimestre_1', 'trimestre_2', 'trimestre_3']

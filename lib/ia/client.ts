@@ -1,12 +1,16 @@
-const KIMI_BASE_URL = 'https://api.moonshot.ai/v1'
-export const MODELO_IA = 'moonshot-v1-8k'
+const DEEPSEEK_BASE_URL = 'https://api.deepseek.com/v1'
+export const MODELO_IA = 'deepseek-chat'
 
-interface KimiResponse {
+// Precios por 1M tokens (USD) — deepseek-chat, cache miss
+export const PRECIO_INPUT_1M = 0.28
+export const PRECIO_OUTPUT_1M = 0.42
+
+interface DeepSeekResponse {
   choices: Array<{ message: { content: string } }>
   usage: { prompt_tokens: number; completion_tokens: number }
 }
 
-export const anthropic = {
+export const iaClient = {
   messages: {
     async create(params: {
       model: string
@@ -14,11 +18,11 @@ export const anthropic = {
       system: string
       messages: Array<{ role: string; content: string }>
     }) {
-      const res = await fetch(`${KIMI_BASE_URL}/chat/completions`, {
+      const res = await fetch(`${DEEPSEEK_BASE_URL}/chat/completions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.KIMI_API_KEY}`,
+          'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`,
         },
         body: JSON.stringify({
           model: params.model,
@@ -32,10 +36,10 @@ export const anthropic = {
 
       if (!res.ok) {
         const text = await res.text()
-        throw new Error(`Kimi API ${res.status}: ${text}`)
+        throw new Error(`DeepSeek API ${res.status}: ${text}`)
       }
 
-      const data: KimiResponse = await res.json()
+      const data: DeepSeekResponse = await res.json()
       return {
         content: [{ type: 'text' as const, text: data.choices[0]?.message?.content ?? '' }],
         usage: {

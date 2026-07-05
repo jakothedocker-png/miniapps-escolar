@@ -83,7 +83,7 @@ export default async function DevDashboard() {
         <div className="space-y-3">
           {[
             { label: 'Supabase',      ok: true },
-            { label: 'Anthropic API', ok: !!process.env.ANTHROPIC_API_KEY },
+            { label: 'DeepSeek API', ok: !!process.env.DEEPSEEK_API_KEY },
           ].map(({ label, ok }) => (
             <div key={label} className="flex items-center justify-between text-sm">
               <span style={{ color: '#64748B' }}>{label}</span>

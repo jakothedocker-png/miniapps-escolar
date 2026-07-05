@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
-import { anthropic, MODELO_IA } from '@/lib/anthropic/client'
-import { SYSTEM_PROMPT_OBSERVACIONES, SYSTEM_PROMPT_OBS_CAMPO } from '@/lib/anthropic/prompts'
+import { iaClient, MODELO_IA, PRECIO_INPUT_1M, PRECIO_OUTPUT_1M } from '@/lib/ia/client'
+import { SYSTEM_PROMPT_OBSERVACIONES, SYSTEM_PROMPT_OBS_CAMPO } from '@/lib/ia/prompts'
 
 const CAMPOS_LABEL: Record<string, string> = {
   lenguajes: 'Lenguajes',
@@ -156,8 +156,7 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // 9. Construir prompt
-  const nombreCompleto = `${alumno.nombre} ${alumno.apellido_paterno}`
+  // 9. Construir prompt — sin datos de identificación del alumno (compromiso de la política de privacidad)
   const grado = grupo?.grado ?? '?'
 
   let systemPrompt: string
@@ -166,14 +165,14 @@ export async function POST(request: NextRequest) {
   if (esCampoPorCampo) {
     const campoLabel = CAMPOS_LABEL[campo] ?? campo
     systemPrompt = SYSTEM_PROMPT_OBS_CAMPO
-    userPrompt = `Alumno: ${nombreCompleto}, ${grado} grado
+    userPrompt = `Alumno de ${grado} grado
 Trimestre: ${trimestre}
 Campo formativo a observar: ${campoLabel}
 Calificación en este campo: ${evaluacion?.[campo as keyof typeof evaluacion] ?? 'N/A'}
 ${descripcion_maestro ? `Descripción del maestro: ${descripcion_maestro}` : `Contexto: alumno de ${grado} grado`}`
   } else {
     systemPrompt = SYSTEM_PROMPT_OBSERVACIONES
-    userPrompt = `Alumno: ${nombreCompleto}, ${grado} grado
+    userPrompt = `Alumno de ${grado} grado
 Trimestre: ${trimestre}
 Promedios: Lenguajes ${evaluacion?.lenguajes ?? 'N/A'}, Saberes ${evaluacion?.saberes ?? 'N/A'}, Ética ${evaluacion?.etica ?? 'N/A'}, Humano y Comunitario ${evaluacion?.humanos ?? 'N/A'}
 Descripción del maestro: ${descripcion_maestro || 'Sin descripción adicional'}`
@@ -186,7 +185,7 @@ Descripción del maestro: ${descripcion_maestro || 'Sin descripción adicional'}
   let tokens_output = 0
 
   const llamarIA = async (mensajes: Array<{ role: string; content: string }>) => {
-    const aiResponse = await anthropic.messages.create({
+    const aiResponse = await iaClient.messages.create({
       model: MODELO_IA,
       max_tokens: 900,
       system: systemPrompt,
@@ -265,7 +264,7 @@ Descripción del maestro: ${descripcion_maestro || 'Sin descripción adicional'}
   }
 
   // 12. Log de IA (siempre)
-  const costo_usd = (tokens_input * 0.001 + tokens_output * 0.005) / 1000
+  const costo_usd = (tokens_input * PRECIO_INPUT_1M + tokens_output * PRECIO_OUTPUT_1M) / 1_000_000
   await adminClient.from('logs_ia').insert({
     maestro_id: user.id,
     alumno_id,

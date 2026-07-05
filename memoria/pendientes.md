@@ -4,11 +4,10 @@
 
 ## Prioridad alta (maestro solo — primer cliente)
 
-- [ ] **IA en calificaciones** — verificar que el botón "Generar observaciones" funcione con Kimi; el endpoint `/api/ia/observaciones` existe pero no se ha probado integrado con la UI
-- [ ] **Alumnos en Riesgo** — verificar que la query a Supabase funcione y los datos se muestren correctamente con el nuevo schema
-- [ ] **Reportes Excel** — verificar en navegador que el archivo descargado tiene el formato correcto (Diag + T1+T2+T3 + promedios)
-- [ ] **Kardex individual** — verificar que la columna Diagnóstico aparece y los promedios están truncados (no redondeados)
-- [ ] **Cuadro General PDF** — verificar formato y que el parámetro `trimestre=0` funciona para Diagnóstico
+- [ ] **DEEPSEEK_API_KEY** — poner la key real en `.env.local` y en las variables de entorno de Vercel (sin esto la IA no funciona). Generar en https://platform.deepseek.com/api_keys
+- [ ] **Prueba end-to-end de IA** — generar una observación real desde la UI con DeepSeek (verificación estática hecha 2026-07-04; falta prueba en navegador con key activa)
+- [ ] **Prueba en navegador de reportes** — descargar Excel, Kardex y Cuadro General con datos reales (código verificado estáticamente 2026-07-04)
+- [ ] **Reiniciar observación IA** — botón para que el supervisor borre las opciones generadas de un alumno (paridad con SIDEC `reiniciarObservacionIA`)
 
 ## Prioridad media (cuando lleguen directores)
 

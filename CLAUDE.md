@@ -11,7 +11,7 @@
 - URL producción: `https://calificaciones.miniapps.com.mx`
 - Hosting: Vercel
 - Base de datos: Supabase (PostgreSQL)
-- IA: Anthropic API (`claude-sonnet-4-6`)
+- IA: DeepSeek API (`deepseek-chat`) — cliente propio en `lib/ia/client.ts`
 - Referencia completa: `MEMORIA_MINIAPPS_ESCOLAR.md`
 
 ---
@@ -22,7 +22,7 @@
 Next.js 14 (App Router)
 Tailwind CSS
 Supabase (@supabase/supabase-js)
-Anthropic SDK (@anthropic-ai/sdk)
+DeepSeek API (fetch directo, sin SDK — lib/ia/client.ts)
 SheetJS (xlsx)
 Framer Motion
 Lucide React
@@ -34,9 +34,10 @@ Recharts
 ## Reglas absolutas
 
 ### Seguridad
-- `ANTHROPIC_API_KEY` **NUNCA** en el cliente. Solo en Route Handlers (`/app/api/`)
+- `DEEPSEEK_API_KEY` **NUNCA** en el cliente. Solo en Route Handlers (`/app/api/`)
 - `SUPABASE_SERVICE_ROLE_KEY` **NUNCA** en el cliente. Solo en server-side
-- Toda llamada a Anthropic API va a través de `/app/api/ia/observaciones/route.ts`
+- Toda llamada a la API de IA va a través de `/app/api/ia/observaciones/route.ts`
+- **NUNCA** enviar datos de identificación del alumno (nombre, CURP) al proveedor de IA — la política de privacidad lo prohíbe
 - RLS de Supabase es la capa de seguridad de datos — no filtrar por zona en el cliente
 
 ### Base de datos
@@ -73,7 +74,7 @@ Recharts
   /charts/            → gráficas con Recharts
 /lib/
   /supabase/          → clientes supabase (server y client)
-  /anthropic/         → cliente y prompts de IA
+  /ia/                → cliente DeepSeek y prompts de IA
   /excel/             → utilidades SheetJS
   /utils/             → helpers generales
 /types/               → tipos TypeScript de todas las entidades
@@ -121,7 +122,7 @@ type Rol = 'superadmin' | 'supervisor' | 'director' | 'maestro'
 // 1. Verificar sesión, rol maestro, licencia vigente
 // 2. Consultar calificaciones del alumno en Supabase
 // 3. Construir prompt con contexto educativo mexicano (Plan 2022 NEM)
-// 4. Llamar Anthropic API — respuesta en JSON con 8 observaciones
+// 4. Llamar DeepSeek API — respuesta en JSON con 8 observaciones
 //    (2 por cada uno de los 4 campos formativos)
 // 5. Guardar en tabla `observaciones` con tokens_usados
 // 6. Retornar al cliente

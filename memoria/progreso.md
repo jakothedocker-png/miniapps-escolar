@@ -9,6 +9,31 @@
 
 ## Sesiones
 
+### Sesión — 2026-07-04
+**Verificación del bloque de reportes e IA (QA estático + build)**
+- Reportes Excel ✓, Kardex ✓, Alumnos en Riesgo ✓ (promedio_general existe y se calcula al guardar; director/supervisor filtran por escuela/zona)
+- Build de producción sin errores (34 rutas)
+
+**Migración de proveedor IA: Kimi → DeepSeek**
+- `lib/anthropic/` renombrado a `lib/ia/`; cliente reescrito para DeepSeek (`deepseek-chat`, `api.deepseek.com/v1`, env `DEEPSEEK_API_KEY`)
+- Costo en `logs_ia` actualizado a tarifas DeepSeek ($0.28/$0.42 por 1M tokens)
+- `CONFIGURACION_API_KIMI.md` reemplazado por `CONFIGURACION_API_DEEPSEEK.md`
+- CLAUDE.md, política de privacidad (md + página) y Dev Console actualizados
+- **PENDIENTE: falta poner la key real en `DEEPSEEK_API_KEY` (.env.local y Vercel) — sin eso la IA no funciona**
+
+**Fix privacidad: ya no se envía el nombre del alumno a la IA**
+- El prompt enviaba `Alumno: {nombre apellido}` violando la promesa de la política de privacidad ("no se envían datos de identificación")
+- Ahora solo se envía grado, campo, calificación y descripción del maestro
+- Nueva regla absoluta en CLAUDE.md: nunca enviar nombre/CURP al proveedor de IA
+
+**Fix redondeo en Cuadro General**
+- `Math.round` → truncado `Math.floor` en promedios (9.75 muestra 9.7, consistente con Excel/Kardex/captura)
+- Con `trimestre=0` las calificaciones del Diagnóstico ahora muestran 1 decimal truncado (antes entero redondeado)
+
+**Fix seguridad multi-tenant en rutas de reportes**
+- excel, kardex y cuadro-general no validaban al rol `supervisor` — podía descargar reportes de grupos de otras zonas vía API directa
+- Fix: `if (rol === 'supervisor' && grupo.zona_id !== usuario.zona_id) → 403` (excel-escuela ya lo tenía)
+
 ### Sesión — 2026-06-27
 **Contexto y arquitectura**
 - Diagnóstico completo del proyecto: se identificó que el agente anterior construyó un producto diferente al SIDEC (SaaS de maestros individuales vs gestión de zona)

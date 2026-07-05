@@ -53,11 +53,11 @@ Los datos se almacenan en **Supabase** (PostgreSQL), plataforma con certificacio
 
 ## 5. Uso de Inteligencia Artificial (IA)
 
-Esta plataforma incorpora un módulo opcional de generación de observaciones con Inteligencia Artificial, utilizando el modelo **Claude Sonnet de Anthropic**. Al activar esta función:
+Esta plataforma incorpora un módulo opcional de generación de observaciones con Inteligencia Artificial, utilizando el modelo **DeepSeek (DeepSeek AI)**. Al activar esta función:
 
-- El sistema envía a la API de Anthropic únicamente el nombre del campo formativo, la calificación del alumno y la descripción opcional proporcionada por el docente
+- El sistema envía a la API del proveedor de IA únicamente el grado escolar, el nombre del campo formativo, la calificación del alumno y la descripción opcional proporcionada por el docente
 - **No se envían datos de identificación del alumno** (nombre, CURP u otros) a servicios externos
-- Anthropic no almacena estos datos de forma permanente ni los utiliza para entrenamiento sin consentimiento explícito, conforme a su política de privacidad vigente
+- El tratamiento de los datos enviados se rige por la política de privacidad vigente del proveedor de IA
 - El uso de este módulo es **voluntario**; el docente puede redactar observaciones manualmente sin activarlo
 
 > **El docente es responsable de revisar, validar y, en su caso, modificar el texto generado antes de guardarlo.** La plataforma no garantiza la exactitud, pertinencia ni idoneidad del contenido producido por la IA.

@@ -36,13 +36,9 @@ function getDataFromCURP(curp: string | null): { edad: string; sexo: string } {
   return { edad: String(age), sexo }
 }
 
-function fmt(val: number | null | undefined): string {
-  if (val === null || val === undefined) return ''
-  return String(Math.round(val))
-}
-
+// Trunca (no redondea) igual que SIDEC — 9.75 muestra 9.7
 function fmtProm(val: number): string {
-  return val.toFixed(1)
+  return (Math.floor(val * 10) / 10).toFixed(1)
 }
 
 export async function GET(request: NextRequest) {
@@ -59,7 +55,7 @@ export async function GET(request: NextRequest) {
   const admin = createAdminClient()
 
   const [{ data: usuario }, { data: grupo }] = await Promise.all([
-    admin.from('usuarios').select('rol, escuela_id, licencia_plan, licencia_periodos').eq('id', user.id).single(),
+    admin.from('usuarios').select('rol, escuela_id, zona_id, licencia_plan, licencia_periodos').eq('id', user.id).single(),
     admin.from('grupos').select('*').eq('id', grupoId).single(),
   ])
 
@@ -69,6 +65,9 @@ export async function GET(request: NextRequest) {
     return new NextResponse('Sin permisos', { status: 403 })
   }
   if (usuario.rol === 'director' && grupo.escuela_id !== usuario.escuela_id) {
+    return new NextResponse('Sin permisos', { status: 403 })
+  }
+  if (usuario.rol === 'supervisor' && grupo.zona_id !== usuario.zona_id) {
     return new NextResponse('Sin permisos', { status: 403 })
   }
 
@@ -108,7 +107,7 @@ export async function GET(request: NextRequest) {
       const v = ev?.[c] ?? null
       if (v !== null) { sum += Number(v); cnt++; sumasCampos[c] += Number(v); conteoCampos[c]++ }
     })
-    const prom = cnt > 0 ? Math.round((sum / cnt) * 10) / 10 : null
+    const prom = cnt > 0 ? Math.floor((sum / cnt) * 10) / 10 : null
     promediosGrupo.push(prom)
 
     const nombre = `${alumno.apellido_paterno} ${alumno.apellido_materno ?? ''} ${alumno.nombre}`
@@ -120,7 +119,12 @@ export async function GET(request: NextRequest) {
       <td>${sexo}</td>
       <td>${edad}</td>
       <td>${ev?.inasistencias ?? 0}</td>
-      ${campos.map(c => `<td>${fmt(ev?.[c])}</td>`).join('')}
+      ${campos.map(c => {
+        const v = ev?.[c]
+        if (v === null || v === undefined) return '<td></td>'
+        // Diagnóstico lleva decimales (truncado a 1); trimestres son enteros
+        return `<td>${trimestre === 0 ? fmtProm(Number(v)) : String(Math.floor(Number(v)))}</td>`
+      }).join('')}
       <td class="col-prom" style="font-weight:bold;">${prom !== null ? fmtProm(prom) : ''}</td>
     </tr>`
   }).join('')

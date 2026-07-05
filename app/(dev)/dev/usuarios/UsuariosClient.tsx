@@ -1,10 +1,10 @@
 'use client'
-'use client'
 
-import { useState, useTransition, useMemo } from 'react'
-import { Plus, Power, Loader2, Search, X, CreditCard, Check } from 'lucide-react'
+import { Fragment, useState, useTransition, useMemo } from 'react'
+import { Plus, Power, Loader2, Search, X, CreditCard, Check, Sparkles } from 'lucide-react'
 import Modal from '@/components/ui/Modal'
 import { crearUsuario, toggleEstatusUsuario, activarPlan } from './actions'
+import { cargarAlumnosEstadoIA, reiniciarObservacionIA, type AlumnoEstadoIA } from '@/app/actions/ia'
 import type { Usuario, Zona } from '@/types'
 
 // ─── Badges ──────────────────────────────────────────────────────────────────
@@ -98,6 +98,15 @@ export default function UsuariosClient({ usuarios, zonas }: { usuarios: Usuario[
   const [filtroZona,   setFiltroZona]   = useState('')
   const [filtroStatus, setFiltroStatus] = useState('')
 
+  // Panel IA por maestro
+  const [iaAbierto,   setIaAbierto]   = useState<string | null>(null)
+  const [iaTrim,      setIaTrim]      = useState(1)
+  const [iaAlumnos,   setIaAlumnos]   = useState<AlumnoEstadoIA[]>([])
+  const [iaCargando,  setIaCargando]  = useState(false)
+  const [iaError,     setIaError]     = useState<string | null>(null)
+  const [confirmReset, setConfirmReset] = useState<AlumnoEstadoIA | null>(null)
+  const [resetPending, setResetPending] = useState(false)
+
   // ── Handlers ──────────────────────────────────────────────────────────────
 
   function abrirModalPlan(u: Usuario) {
@@ -153,6 +162,42 @@ export default function UsuariosClient({ usuarios, zonas }: { usuarios: Usuario[
 
   function limpiarFiltros() {
     setBusqueda(''); setFiltroRol(''); setFiltroZona(''); setFiltroStatus('')
+  }
+
+  async function cargarIA(maestroId: string, trimestre: number) {
+    setIaCargando(true); setIaError(null)
+    const res = await cargarAlumnosEstadoIA(maestroId, trimestre)
+    if ('alumnos' in res) setIaAlumnos(res.alumnos)
+    else { setIaError(res.error ?? 'Error al cargar'); setIaAlumnos([]) }
+    setIaCargando(false)
+  }
+
+  function togglePanelIA(u: Usuario) {
+    if (iaAbierto === u.id) { setIaAbierto(null); return }
+    setIaAbierto(u.id)
+    setIaAlumnos([])
+    cargarIA(u.id, iaTrim)
+  }
+
+  function cambiarTrimIA(t: number) {
+    setIaTrim(t)
+    if (iaAbierto) cargarIA(iaAbierto, t)
+  }
+
+  async function handleReiniciarIA() {
+    if (!confirmReset) return
+    setResetPending(true)
+    const res = await reiniciarObservacionIA({
+      alumno_id:     confirmReset.alumno_id,
+      trimestre:     iaTrim,
+      ciclo_escolar: confirmReset.ciclo_escolar,
+    })
+    setResetPending(false)
+    if (res?.error) { setIaError(res.error); setConfirmReset(null); return }
+    setIaAlumnos(prev => prev.map(a =>
+      a.alumno_id === confirmReset.alumno_id ? { ...a, generado: false } : a
+    ))
+    setConfirmReset(null)
   }
 
   // ── Datos filtrados ────────────────────────────────────────────────────────
@@ -271,7 +316,8 @@ export default function UsuariosClient({ usuarios, zonas }: { usuarios: Usuario[
             </thead>
             <tbody>
               {filtrados.map((u, idx) => (
-                <tr key={u.id}
+                <Fragment key={u.id}>
+                <tr
                   style={{ borderTop: idx > 0 ? '1px solid rgba(6,135,216,0.06)' : undefined }}
                   onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'rgba(6,135,216,0.03)'}
                   onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = ''}>
@@ -303,6 +349,17 @@ export default function UsuariosClient({ usuarios, zonas }: { usuarios: Usuario[
                   </td>
                   <td className="px-4 py-4">
                     <div className="flex items-center gap-2">
+                      {u.rol === 'maestro' && (
+                        <button onClick={() => togglePanelIA(u)} title="Observaciones IA de sus alumnos"
+                          className="p-1.5 rounded-lg transition-colors"
+                          style={iaAbierto === u.id
+                            ? { color: '#7C3AED', background: 'rgba(109,40,217,0.10)' }
+                            : { color: '#94A3B8' }}
+                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#7C3AED'; (e.currentTarget as HTMLElement).style.background = 'rgba(109,40,217,0.10)' }}
+                          onMouseLeave={e => { if (iaAbierto !== u.id) { (e.currentTarget as HTMLElement).style.color = '#94A3B8'; (e.currentTarget as HTMLElement).style.background = '' } }}>
+                          <Sparkles size={14} />
+                        </button>
+                      )}
                       <button onClick={() => abrirModalPlan(u)} title="Gestionar plan"
                         className="p-1.5 rounded-lg transition-colors"
                         style={{ color: '#94A3B8' }}
@@ -327,11 +384,99 @@ export default function UsuariosClient({ usuarios, zonas }: { usuarios: Usuario[
                     </div>
                   </td>
                 </tr>
+
+                {/* Panel IA — alumnos del maestro con estado de generación */}
+                {iaAbierto === u.id && (
+                  <tr>
+                    <td colSpan={7} style={{ background: '#FAFBFF', borderTop: '1px solid rgba(6,135,216,0.06)' }}>
+                      <div className="px-6 py-4 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: '#64748B' }}>
+                            Observaciones IA — {iaCargando ? '…' : `${iaAlumnos.length} alumno${iaAlumnos.length !== 1 ? 's' : ''}`}
+                          </p>
+                          <div className="flex gap-1.5">
+                            {[{ t: 0, l: 'Diag' }, { t: 1, l: 'T1' }, { t: 2, l: 'T2' }, { t: 3, l: 'T3' }].map(p => (
+                              <button key={p.t} onClick={() => cambiarTrimIA(p.t)}
+                                className="px-2.5 py-1 rounded-lg text-xs font-semibold transition-all"
+                                style={iaTrim === p.t
+                                  ? { background: 'rgba(6,135,216,0.10)', color: '#0687D8', border: '1px solid rgba(6,135,216,0.30)' }
+                                  : { background: '#fff', color: '#64748B', border: '1px solid #E2E8F0' }}>
+                                {p.l}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {iaError && (
+                          <p className="text-xs px-3 py-2 rounded-xl" style={{ color: '#DC2626', background: '#FEF2F2' }}>{iaError}</p>
+                        )}
+
+                        {iaCargando ? (
+                          <p className="text-xs py-2" style={{ color: '#94A3B8' }}>Cargando alumnos…</p>
+                        ) : iaAlumnos.length === 0 && !iaError ? (
+                          <p className="text-xs py-2" style={{ color: '#94A3B8' }}>Este maestro no tiene alumnos activos.</p>
+                        ) : (
+                          <div className="space-y-0">
+                            {iaAlumnos.map(al => (
+                              <div key={al.alumno_id} className="flex items-center justify-between py-1.5"
+                                style={{ borderBottom: '1px solid rgba(6,135,216,0.06)' }}>
+                                <span className="text-sm" style={{ color: '#1E2D3D' }}>{al.nombre}</span>
+                                <div className="flex items-center gap-2">
+                                  <span className="px-2 py-0.5 rounded-full text-xs font-bold"
+                                    style={al.generado
+                                      ? { background: '#FFFBEB', color: '#B45309' }
+                                      : { background: '#F1F5F9', color: '#94A3B8' }}>
+                                    {al.generado ? 'Generado' : 'Sin generar'}
+                                  </span>
+                                  {al.generado && (
+                                    <button onClick={() => setConfirmReset(al)}
+                                      className="px-2.5 py-0.5 rounded-lg text-xs font-semibold transition-colors"
+                                      style={{ background: '#FEF2F2', color: '#DC2626', border: '1px solid #FECACA' }}>
+                                      Reiniciar
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                )}
+                </Fragment>
               ))}
             </tbody>
           </table>
         )}
       </div>
+
+      {/* ── Modal: Confirmar reinicio de observación IA ────────────────────── */}
+      {confirmReset && (
+        <Modal titulo="Reiniciar observación IA" onClose={() => setConfirmReset(null)}>
+          <div className="space-y-4">
+            <p className="text-sm" style={{ color: '#1E2D3D' }}>
+              Se borrarán las opciones generadas por IA de <strong>{confirmReset.nombre}</strong> en
+              el período seleccionado y se reiniciará el contador de usos. El maestro podrá volver a generar.
+            </p>
+            <p className="text-xs px-3 py-2 rounded-xl" style={{ color: '#B45309', background: '#FFFBEB' }}>
+              La observación ya escrita en la boleta se conserva; solo se reinicia la generación IA.
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setConfirmReset(null)}
+                className="flex-1 py-2 rounded-xl text-sm transition-colors"
+                style={{ border: '1px solid #E2E8F0', color: '#64748B' }}>
+                Cancelar
+              </button>
+              <button onClick={handleReiniciarIA} disabled={resetPending}
+                className="flex-1 py-2 rounded-xl disabled:opacity-60 text-white text-sm font-semibold flex items-center justify-center gap-2"
+                style={{ background: '#DC2626' }}>
+                {resetPending ? <><Loader2 size={14} className="animate-spin" /> Reiniciando…</> : 'Sí, reiniciar'}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
 
       {/* ── Modal: Gestionar Plan ──────────────────────────────────────────── */}
       {modalPlan && (

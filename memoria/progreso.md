@@ -9,6 +9,23 @@
 
 ## Sesiones
 
+### Sesión — 2026-07-04 (tarde)
+**Auditoría de calificaciones — inserción automática (Server Action, no trigger SQL)**
+- `app/actions/calificaciones.ts`: `detectarCambios` (diff antes del upsert) + `registrarAuditoria` (insert tras guardado exitoso)
+- Conectado en `guardarCalificaciones`, `guardarAlumnoCalif` y `guardarAntecedentes`
+- Solo se audita la modificación de una calificación ya guardada (anterior no null y distinto); primera captura no genera registro
+- La auditoría nunca bloquea el guardado (error solo va a console.error)
+- Fix de paso: `guardarAntecedentes` usaba `Math.round` → `Math.floor` (regla de truncado)
+
+**Reiniciar observación IA (paridad SIDEC `reiniciarObservacionIA`)**
+- Nuevo `app/actions/ia.ts`: `cargarAlumnosEstadoIA` y `reiniciarObservacionIA` (borra `ia_obs_*` y pone `ia_usos_*` en 0; conserva `obs_*` porque puede ser texto manual del maestro)
+- Permisos: superadmin y supervisor (supervisor solo su zona)
+- Dev Console `/dev/usuarios`: botón ✨ en filas de maestros → panel expandible con selector Diag/T1/T2/T3, badge Generado/Sin generar y botón Reiniciar con modal de confirmación
+
+**Fix seguridad: Server Actions de Dev Console sin verificación de rol**
+- `crearUsuario`, `toggleEstatusUsuario`, `activarPlan`, `crearZona`, `actualizarZona`, `toggleEstatusZona` usaban `createAdminClient()` sin verificar al llamante — un usuario cualquiera podía invocarlos como endpoint POST (el guard del layout no protege actions)
+- Fix: helper `esSuperadmin()` al inicio de cada action
+
 ### Sesión — 2026-07-04
 **Verificación del bloque de reportes e IA (QA estático + build)**
 - Reportes Excel ✓, Kardex ✓, Alumnos en Riesgo ✓ (promedio_general existe y se calcula al guardar; director/supervisor filtran por escuela/zona)

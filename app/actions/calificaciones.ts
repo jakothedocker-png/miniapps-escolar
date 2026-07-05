@@ -66,6 +66,105 @@ async function verificarPeriodo(
   return null
 }
 
+const CAMPOS_FORMATIVOS = ['lenguajes', 'saberes', 'etica', 'humanos'] as const
+
+interface ValoresCampos {
+  alumno_id: string
+  trimestre: number
+  lenguajes: number | null
+  saberes: number | null
+  etica: number | null
+  humanos: number | null
+}
+
+interface CambioCalif {
+  alumno_id: string
+  campo: string
+  valor_anterior: number
+  valor_nuevo: number | null
+  trimestre: number
+}
+
+// Solo se audita la modificación de una calificación ya guardada (paridad con SIDEC).
+// Se llama ANTES del upsert; los registros se insertan solo si el guardado tuvo éxito.
+async function detectarCambios(
+  admin: ReturnType<typeof createAdminClient>,
+  items: ValoresCampos[],
+  cicloEscolar: string,
+): Promise<CambioCalif[]> {
+  const alumnoIds = [...new Set(items.map(i => i.alumno_id))]
+  const trimestres = [...new Set(items.map(i => i.trimestre))]
+
+  const { data: existentes } = await admin
+    .from('evaluaciones')
+    .select('alumno_id, trimestre, lenguajes, saberes, etica, humanos')
+    .in('alumno_id', alumnoIds)
+    .in('trimestre', trimestres)
+    .eq('ciclo_escolar', cicloEscolar)
+
+  if (!existentes || existentes.length === 0) return []
+
+  const prevMap = new Map(existentes.map(e => [`${e.alumno_id}|${e.trimestre}`, e]))
+  const cambios: CambioCalif[] = []
+
+  items.forEach(item => {
+    const prev = prevMap.get(`${item.alumno_id}|${item.trimestre}`)
+    if (!prev) return
+    CAMPOS_FORMATIVOS.forEach(campo => {
+      const anterior = prev[campo] !== null && prev[campo] !== undefined ? Number(prev[campo]) : null
+      const nuevo = item[campo]
+      if (anterior === null || anterior === nuevo) return
+      cambios.push({
+        alumno_id: item.alumno_id,
+        campo,
+        valor_anterior: anterior,
+        valor_nuevo: nuevo,
+        trimestre: item.trimestre,
+      })
+    })
+  })
+
+  return cambios
+}
+
+async function registrarAuditoria(
+  admin: ReturnType<typeof createAdminClient>,
+  cambios: CambioCalif[],
+  ctx: { editorId: string; cicloEscolar: string; escuelaId: string; zonaId: string },
+) {
+  if (cambios.length === 0) return
+
+  const alumnoIds = [...new Set(cambios.map(c => c.alumno_id))]
+  const [{ data: editor }, { data: alumnos }] = await Promise.all([
+    admin.from('usuarios').select('nombre').eq('id', ctx.editorId).single(),
+    admin.from('alumnos').select('id, nombre, apellido_paterno, apellido_materno').in('id', alumnoIds),
+  ])
+
+  const nombreAlumno = new Map(
+    (alumnos ?? []).map(a => [
+      a.id,
+      `${a.apellido_paterno} ${a.apellido_materno ?? ''} ${a.nombre}`.replace(/\s+/g, ' ').trim(),
+    ])
+  )
+
+  const rows = cambios.map(c => ({
+    editor_id:      ctx.editorId,
+    editor_nombre:  editor?.nombre ?? 'Desconocido',
+    alumno_nombre:  nombreAlumno.get(c.alumno_id) ?? 'Desconocido',
+    campo:          c.campo,
+    valor_anterior: c.valor_anterior,
+    valor_nuevo:    c.valor_nuevo,
+    trimestre:      c.trimestre,
+    ciclo_escolar:  ctx.cicloEscolar,
+    escuela_id:     ctx.escuelaId,
+    zona_id:        ctx.zonaId,
+  }))
+
+  // La auditoría nunca debe bloquear el guardado de calificaciones
+  const { error } = await admin.from('auditoria_calificaciones').insert(rows)
+  if (error) console.error('Error al registrar auditoría de calificaciones:', error.message)
+}
+
 interface CalificacionItem {
   alumno_id: string
   grupo_id: string
@@ -132,6 +231,9 @@ export async function guardarCalificaciones(
     }
   }
 
+  const cicloEscolar = calificaciones[0].ciclo_escolar
+  const cambios = await detectarCambios(admin, calificaciones, cicloEscolar)
+
   const rows = calificaciones.map(c => ({
     alumno_id:       c.alumno_id,
     grupo_id:        c.grupo_id,
@@ -153,6 +255,13 @@ export async function guardarCalificaciones(
     .upsert(rows, { onConflict: 'alumno_id,trimestre,ciclo_escolar' })
 
   if (error) return { error: error.message }
+
+  await registrarAuditoria(admin, cambios, {
+    editorId: user.id,
+    cicloEscolar,
+    escuelaId: usuario.escuela_id,
+    zonaId: usuario.zona_id,
+  })
 
   revalidatePath(`/app/grupos/${grupoId}/calificaciones`)
   revalidatePath('/app/dashboard')
@@ -189,6 +298,8 @@ export async function guardarAlumnoCalif(row: {
   const periodoError = await verificarPeriodo(admin, user.id, row.trimestre, row.alumno_id)
   if (periodoError) return { error: periodoError }
 
+  const cambios = await detectarCambios(admin, [row], row.ciclo_escolar)
+
   const { error } = await admin
     .from('evaluaciones')
     .upsert({
@@ -208,6 +319,14 @@ export async function guardarAlumnoCalif(row: {
     }, { onConflict: 'alumno_id,trimestre,ciclo_escolar' })
 
   if (error) return { error: error.message }
+
+  await registrarAuditoria(admin, cambios, {
+    editorId: user.id,
+    cicloEscolar: row.ciclo_escolar,
+    escuelaId: usuario.escuela_id,
+    zonaId: usuario.zona_id,
+  })
+
   return { ok: true }
 }
 
@@ -298,9 +417,16 @@ export async function guardarAntecedentes(data: {
 
   if (trimestresValidos.length === 0) return { ok: true }
 
+  const cambios = await detectarCambios(
+    admin,
+    trimestresValidos.map(t => ({ ...t, alumno_id: data.alumno_id })),
+    data.ciclo_escolar,
+  )
+
   const rows = trimestresValidos.map(t => {
     const vals = [t.lenguajes, t.saberes, t.etica, t.humanos].filter(v => v !== null) as number[]
-    const promedio = vals.length > 0 ? Math.round((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10 : null
+    // Truncado, no redondeo (regla del proyecto: 9.75 → 9.7)
+    const promedio = vals.length > 0 ? Math.floor((vals.reduce((a, b) => a + b, 0) / vals.length) * 10) / 10 : null
     return {
       alumno_id: data.alumno_id,
       grupo_id: data.grupo_id,
@@ -323,6 +449,13 @@ export async function guardarAntecedentes(data: {
     .upsert(rows, { onConflict: 'alumno_id,trimestre,ciclo_escolar' })
 
   if (error) return { error: error.message }
+
+  await registrarAuditoria(admin, cambios, {
+    editorId: user.id,
+    cicloEscolar: data.ciclo_escolar,
+    escuelaId: grupo.escuela_id,
+    zonaId: grupo.zona_id,
+  })
 
   revalidatePath(`/app/grupos/${data.grupo_id}/alumnos`)
   return { ok: true }

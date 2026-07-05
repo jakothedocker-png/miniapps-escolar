@@ -1,7 +1,20 @@
 'use server'
 
-import { createAdminClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+
+// Los Server Actions son endpoints públicos: el guard del layout /dev no los protege
+async function esSuperadmin(): Promise<boolean> {
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return false
+  const { data: usuario } = await createAdminClient()
+    .from('usuarios')
+    .select('rol')
+    .eq('id', user.id)
+    .single()
+  return usuario?.rol === 'superadmin'
+}
 
 export async function crearUsuario(data: {
   nombre: string
@@ -10,6 +23,7 @@ export async function crearUsuario(data: {
   zona_id: string
   rol: string
 }) {
+  if (!(await esSuperadmin())) return { error: 'Sin permisos' }
   const supabase = createAdminClient()
 
   // Crear en Supabase Auth
@@ -42,6 +56,7 @@ export async function crearUsuario(data: {
 }
 
 export async function toggleEstatusUsuario(id: string, estatus: string) {
+  if (!(await esSuperadmin())) return { error: 'Sin permisos' }
   const supabase = createAdminClient()
   const nuevoEstatus = estatus === 'activo' ? 'inactivo' : 'activo'
 
@@ -60,6 +75,7 @@ export async function activarPlan(data: {
   ciclo: string               // '2025-2026'
   vence: string | null        // fecha ISO de corte absoluta (o null)
 }) {
+  if (!(await esSuperadmin())) return { error: 'Sin permisos' }
   const supabase = createAdminClient()
 
   const esTodosLosPeriodos = TODOS_LOS_PERIODOS.every(p => data.periodos.includes(p))

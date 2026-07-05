@@ -7,13 +7,12 @@
 - [ ] **DEEPSEEK_API_KEY** — poner la key real en `.env.local` y en las variables de entorno de Vercel (sin esto la IA no funciona). Generar en https://platform.deepseek.com/api_keys
 - [ ] **Prueba end-to-end de IA** — generar una observación real desde la UI con DeepSeek (verificación estática hecha 2026-07-04; falta prueba en navegador con key activa)
 - [ ] **Prueba en navegador de reportes** — descargar Excel, Kardex y Cuadro General con datos reales (código verificado estáticamente 2026-07-04)
-- [ ] **Reiniciar observación IA** — botón para que el supervisor borre las opciones generadas de un alumno (paridad con SIDEC `reiniciarObservacionIA`)
 
 ## Prioridad media (cuando lleguen directores)
 
 - [ ] **Home Director** — resumen de su escuela: total alumnos, grupos activos, captura por grado, alertas de riesgo
 - [ ] **Movimientos de alumnos** — frontend completo: tabla con filtros, formulario de alta/baja/traslado. La tabla DB `movimientos` ya existe con RLS.
-- [ ] **Auditoría de calificaciones** — frontend: tabla con filtros por período, campo y maestro. La tabla DB `auditoria_calificaciones` ya existe con RLS. Falta también el trigger que inserte registros automáticamente al guardar calificaciones.
+- [ ] **Auditoría de calificaciones** — frontend: tabla con filtros por período, campo y maestro. La tabla DB `auditoria_calificaciones` ya existe con RLS y **ya recibe registros** desde los Server Actions (hecho 2026-07-04).
 - [ ] **Dashboard Supervisor** — estadísticas de zona: matrícula total, escuelas activas, promedio general por escuela, alertas de captura pendiente
 
 ## Prioridad baja (mejoras)
@@ -30,9 +29,13 @@
 
 ## Decisiones pendientes
 
-- ¿El trigger de auditoría de calificaciones se hace en PostgreSQL (trigger nativo) o en el Server Action de `guardarCalificaciones`? **Recomendación:** Server Action es más simple y no requiere función SQL adicional.
+- (ninguna)
 
 ## Completados
+
+- [x] Auditoría de calificaciones — inserción automática desde Server Actions (decisión: Server Action, no trigger SQL) (2026-07-04)
+- [x] Reiniciar observación IA — Server Action + panel en Dev Console /dev/usuarios (2026-07-04)
+- [x] Guard superadmin en Server Actions de /dev/usuarios y /dev/zonas (2026-07-04)
 
 - [x] Schema base Supabase (2026-06-14)
 - [x] Migraciones: licencias, períodos, IA en evaluaciones (2026-06-14 a 2026-06-19)

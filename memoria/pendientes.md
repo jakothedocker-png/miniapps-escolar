@@ -17,7 +17,6 @@
 
 ## Prioridad baja (mejoras)
 
-- [ ] **Aprovechamiento / gráficas** — equivalente al módulo de SIDEC: tabs Por Período, Promedio Final, Aprendizajes Esperados, Gráficas, Evolución. Recharts ya está instalado.
 - [ ] **Respaldos ZIP** — descarga masiva de kardex de todo un grupo o escuela en ZIP
 - [ ] **Boleta de grupo completo** — generar todos los kardex de un grupo en una sola acción (hoy es alumno por alumno)
 - [ ] **Sistema de pagos** — integración Stripe o equivalente para activar licencias automáticamente (hoy es manual vía superadmin)
@@ -33,6 +32,7 @@
 
 ## Completados
 
+- [x] Aprovechamiento con gráficas — 5 tabs + Excel 6 hojas, ruta /app/aprovechamiento (2026-07-04)
 - [x] Auditoría de calificaciones — inserción automática desde Server Actions (decisión: Server Action, no trigger SQL) (2026-07-04)
 - [x] Reiniciar observación IA — Server Action + panel en Dev Console /dev/usuarios (2026-07-04)
 - [x] Guard superadmin en Server Actions de /dev/usuarios y /dev/zonas (2026-07-04)

@@ -10,6 +10,15 @@
 ## Sesiones
 
 ### Sesión — 2026-07-04 (tarde)
+**Módulo Aprovechamiento completo (paridad SIDEC, adaptado a maestro)**
+- Nueva ruta `/app/aprovechamiento`: `page.tsx` (server: grupos del maestro + alumnos activos + evaluaciones de todos los períodos) + `AprovechamientoClient.tsx`
+- 5 tabs: Por Período, Promedio Final, Aprendizajes Esperados, Gráficas (Recharts), Evolución (Diag→T3)
+- Adaptación clave: en SIDEC las filas son escuelas (nivel zona); aquí son alumnos del grupo del maestro
+- Cálculos fieles a SIDEC: solo calificaciones > 0 cuentan, truncado Math.floor, promedio final = media de promedios trimestrales truncados (Diagnóstico excluido), rangos r10–r5, colores de celda por umbral
+- Export Excel 6 hojas (DIAG, 1ER-3ER TRIM, PROM FINAL, APREND-ESP) con SheetJS
+- Entrada "Aprovechamiento" (BarChart3) en el sidebar del maestro, después de Reportes
+- Build de producción sin errores (35 rutas)
+
 **Auditoría de calificaciones — inserción automática (Server Action, no trigger SQL)**
 - `app/actions/calificaciones.ts`: `detectarCambios` (diff antes del upsert) + `registrarAuditoria` (insert tras guardado exitoso)
 - Conectado en `guardarCalificaciones`, `guardarAlumnoCalif` y `guardarAntecedentes`
@@ -90,7 +99,7 @@
 - Kardex PDF: corregido hoy — pendiente verificar
 - Cuadro General PDF: existe, pendiente verificar formato
 - Alumnos en Riesgo: página existe, pendiente verificar datos
-- Aprovechamiento / gráficas: componente `GraficaPromedios.tsx` existe, módulo incompleto
+- Aprovechamiento: implementado 2026-07-04 — pendiente prueba en navegador con datos reales
 - Movimientos de alumnos: tabla DB lista, frontend NO existe aún
 - Auditoría de calificaciones: tabla DB lista, frontend NO existe aún
 - Respaldos ZIP: NO existe aún
@@ -113,9 +122,8 @@
 ## Módulos pendientes (por orden de prioridad)
 - [ ] IA en calificaciones — verificar y activar botón Generar
 - [ ] Alumnos en Riesgo — verificar query y visualización
-- [ ] Aprovechamiento / gráficas — pendiente implementar
+- [ ] Respaldos ZIP — desde cero
 - [ ] Movimientos de alumnos — frontend desde cero (DB lista)
 - [ ] Auditoría de calificaciones — frontend desde cero (DB lista)
-- [ ] Respaldos ZIP — desde cero
 - [ ] Home Director — contenido y estadísticas
 - [ ] Dashboard Supervisor — datos reales de zona
